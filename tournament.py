@@ -5,12 +5,12 @@
 
 import psycopg2
 
-
+#connect to databse
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
-
+#delete all rows in Match table
 def deleteMatches():
     """Remove all the match records from the database."""
     conn = connect()
@@ -19,7 +19,7 @@ def deleteMatches():
     conn.commit()
     conn.close()
 
-
+#delete all rows in Player table
 def deletePlayers():
     """Remove all the player records from the database."""
     conn = connect()
@@ -29,7 +29,7 @@ def deletePlayers():
     conn.close()
 
 
-
+#count the number of players
 def countPlayers():
     conn = connect();
     c = conn.cursor();
@@ -41,7 +41,7 @@ def countPlayers():
     return rows[0][0]
     """Returns the number of players currently registered."""
 
-
+# register players into database
 def registerPlayer(name):
     """Adds a player to the tournament database.
   
@@ -57,7 +57,7 @@ def registerPlayer(name):
     conn.commit();
     conn.close();
 
-
+# get current standing players and matches and wins
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
@@ -73,12 +73,12 @@ def playerStandings():
     """
     conn = connect();
     c = conn.cursor();
-    c.execute("SELECT id,name,wins,matches FROM Standings ORDER BY wins DESC;");
+    c.execute("SELECT * FROM Standings;");
     rows = c.fetchall();
     conn.close();
     return rows;
 
-
+# register math record
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
 
@@ -88,12 +88,11 @@ def reportMatch(winner, loser):
     """
     conn = connect();
     c = conn.cursor();
-    c.execute("INSERT INTO Matches (player, opponent, result) VALUES (%s, %s, 1);", (winner, loser));
-    c.execute("INSERT INTO Matches (player, opponent, result) VALUES (%s, %s, 0);", (loser, winner));
+    c.execute("INSERT INTO Matches (player, opponent) VALUES (%s, %s);", (winner, loser,));
     conn.commit();
     conn.close();
  
- 
+# By Compating adjacent players in the standing view, we choose the players with closest match wins.
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
